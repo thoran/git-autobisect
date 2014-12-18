@@ -2,9 +2,10 @@
 # git-autobisect
 
 # 20141218
-# 0.0.1
+# 0.0.2
 
-require 'Kernel/run'
+# Usage:
+# git-autobisect bundle exec rspec spec/models/class.rb
 
 def test_file(test_command)
   test_command.split.last
@@ -25,20 +26,15 @@ end
 def set_good(test_command)
   hash = most_recent_passing_test_file_hash(test_command)
   raise "No version of #{test_file(test_command)} which passes was found, so I can't help you!" unless hash
-  run "git bisect good #{hash}", show: true
+  system "git bisect good #{hash}"
 end
 
 def set_bad
-  bad_hash = `git log --format=%H`.split("\n").first
-  run "git bisect bad #{bad_hash}", show: true
+  bad_hash = `git rev-parse HEAD`
+  system "git bisect bad #{bad_hash}"
 end
 
 def main
-  tip_or_head = `git rev-parse --abbrev-ref HEAD`.strip
-  if tip_or_head == 'HEAD'
-    puts 'The repository needs to be at the tip of the branch, but HEAD is presently pointing elsewhere...'
-    exit
-  end
   test_command = ARGV.join(' ')
   system 'git bisect start'
   set_bad

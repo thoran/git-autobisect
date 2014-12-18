@@ -2,10 +2,12 @@
 # git-autobisect
 
 # 20141218
-# 0.0.2
+# 0.0.3
 
 # Usage:
-# git-autobisect bundle exec rspec spec/models/class.rb
+# 1. As this assumes that the current hash is the git bisect bad point, first checkout that revision.
+# 2. Issue a command like `git-autobisect bundle exec rspec spec/models/class.rb` or other similar test command.
+# 3. And that's it!
 
 def test_file(test_command)
   test_command.split.last
@@ -23,23 +25,25 @@ def most_recent_passing_test_file_hash(test_command)
   passing_test_file_hash
 end
 
-def set_good(test_command)
+def set_bisect_bad
+  bad_hash = `git rev-parse HEAD`
+  system "git bisect bad #{bad_hash}"
+end
+
+def set_bisect_good(test_command)
   hash = most_recent_passing_test_file_hash(test_command)
   raise "No version of #{test_file(test_command)} which passes was found, so I can't help you!" unless hash
   system "git bisect good #{hash}"
 end
 
-def set_bad
-  bad_hash = `git rev-parse HEAD`
-  system "git bisect bad #{bad_hash}"
-end
-
 def main
   test_command = ARGV.join(' ')
+  system 'git bisect restart'
   system 'git bisect start'
-  set_bad
-  set_good(test_command)
+  set_bisect_bad
+  set_bisect_good(test_command)
   system "git bisect run #{test_command}"
+  system 'git bisect reset'
 end
 
 main

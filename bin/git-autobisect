@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+# git-autobisect
+
+# 20141218
+# 0.0.0
+
+require 'Kernel/run'
+
+def test_file(test_command)
+  test_command.split.last
+end
+
+def most_recent_passing_test_file_hash(test_command)
+  reference_test_hashes = `git log --format=%H #{test_file(test_command)}`
+  passing_test_file_hash = nil
+  reference_test_hashes.split("\n").each do |reference_test_hash|
+    system "git checkout #{reference_test_hash}"
+    system test_command
+    passing_test_file_hash = reference_test_hash if $?.success?
+    break
+  end
+  passing_test_file_hash
+end
+
+def set_good(test_command)
+  hash = most_recent_passing_test_file_hash(test_command)
+  raise "No version of #{test_file(test_command)} which passes was found, so I can't help you!" unless hash
+  run "git bisect good #{hash}", show: true
+end
+
+def set_bad
+  bad_hash = `git log --format=%H`.split("\n").first
+  run "git bisect bad #{bad_hash}", show: true
+end
+
+def main(test_command = nil)
+  tip_or_head = `git rev-parse --abbrev-ref HEAD`.strip
+  if tip_or_head == 'HEAD'
+    puts 'The repository needs to be at the tip of the branch, but HEAD is presently pointing elsewhere...'
+    exit
+  end
+  test_command = ARGV.join(' ') || test_command
+  system 'git bisect start'
+  set_bad
+  set_good(test_command)
+  system "git bisect run #{test_command}"
+end
+
+if __FILE__ == $0
+  main('bundle exec rspec spec/helpers/invoices_helper_spec.rb')
+end

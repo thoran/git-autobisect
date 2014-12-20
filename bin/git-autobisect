@@ -2,7 +2,7 @@
 # git-autobisect
 
 # 20141218
-# 0.0.0
+# 0.0.1
 
 require 'Kernel/run'
 
@@ -33,19 +33,17 @@ def set_bad
   run "git bisect bad #{bad_hash}", show: true
 end
 
-def main(test_command = nil)
+def main
   tip_or_head = `git rev-parse --abbrev-ref HEAD`.strip
   if tip_or_head == 'HEAD'
     puts 'The repository needs to be at the tip of the branch, but HEAD is presently pointing elsewhere...'
     exit
   end
-  test_command = ARGV.join(' ') || test_command
+  test_command = ARGV.join(' ')
   system 'git bisect start'
   set_bad
   set_good(test_command)
   system "git bisect run #{test_command}"
 end
 
-if __FILE__ == $0
-  main('bundle exec rspec spec/helpers/invoices_helper_spec.rb')
-end
+main

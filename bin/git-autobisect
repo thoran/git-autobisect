@@ -1,23 +1,23 @@
 #!/usr/bin/env ruby
 # git-autobisect
 
-# 20141219
-# 0.1.1
+# 20190527
+# 0.2.0
 
 # Usage:
 # 1. As this assumes that the current hash is the git bisect bad point, first checkout that revision.
 # 2. Issue a command like `git-autobisect bundle exec rspec spec/models/class.rb` or other similar test command.
 # 3. And that's it!
 
-# Changes: 
-# 1. The loop in most_recent_passing_test_file_hash() was prematurely being broken out of even if there was an unsuccessful execution of the test_command.
+# Changes since 0.1
+# 1. ~ test_file() to be able to cope with line numbers being supplied at the end with a colon separator.
 
 def starting_hash
   @starting_hash ||= `git rev-parse HEAD`
 end
 
 def test_file(test_command)
-  test_command.split.last
+  test_command.split.last.split(':').first
 end
 
 def most_recent_passing_test_file_hash(test_command)

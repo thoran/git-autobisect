@@ -1,16 +1,30 @@
 #!/usr/bin/env ruby
 # git-autobisect
 
-# 20190527
-# 0.2.0
+# 20200317
+# 0.3.0
 
 # Usage:
 # 1. As this assumes that the current hash is the git bisect bad point, first checkout that revision.
-# 2. Issue a command like `git-autobisect bundle exec rspec spec/models/class.rb` or other similar test command.
+# 2a. Issue a command like:
+#   `git-autobisect bundle exec rspec spec/models/class.rb`
+# OR
+# 2b. If it's necessary to run a command before each test run, then supply that like so:
+#   `git-autobisect bundle exec rspec spec/models/class.rb -p bundle`
+#    which is equivalent to:
+#   `git-autobisect bundle exec rspec spec/models/class.rb --preparatory_command 'bundle install'`.
 # 3. And that's it!
 
-# Changes since 0.1
-# 1. ~ test_file() to be able to cope with line numbers being supplied at the end with a colon separator.
+# Changes since 0.2
+# 1. Previously if gems in the Gemfile change between commits, this could fail, so have introduced the idea of a preparatory command which could be as simple as `bundle install`.
+
+require 'switches.rb'
+
+def switches
+  @switches ||= Switches.new do |s|
+    s.set(:p, :preparatory_command)
+  end
+end
 
 def starting_hash
   @starting_hash ||= `git rev-parse HEAD`
@@ -20,11 +34,12 @@ def test_file(test_command)
   test_command.split.last.split(':').first
 end
 
-def most_recent_passing_test_file_hash(test_command)
+def most_recent_passing_test_file_hash(preparatory_command, test_command)
   reference_test_hashes = `git log --format=%H #{test_file(test_command)}`
   passing_test_file_hash = nil
   reference_test_hashes.split("\n").each do |reference_test_hash|
     system "git checkout #{reference_test_hash}"
+    system preparatory_command
     system test_command
     if $?.success?
       passing_test_file_hash = reference_test_hash
@@ -38,18 +53,19 @@ def set_bisect_bad
   system "git bisect bad #{starting_hash}"
 end
 
-def set_bisect_good(test_command)
-  hash = most_recent_passing_test_file_hash(test_command)
+def set_bisect_good(preparatory_command, test_command)
+  hash = most_recent_passing_test_file_hash(preparatory_command, test_command)
   raise "No version of #{test_file(test_command)} which passes was found, so I can't help you!" unless hash
   system "git bisect good #{hash}"
 end
 
 def main
+  preparatory_command = switches.preparatory_command # Need to process the switches first so as it clears out ARGV of any thing which is a switch prior to assigning the test_command.
   test_command = ARGV.join(' ')
   system 'git bisect restart'
   system 'git bisect start'
   set_bisect_bad
-  set_bisect_good(test_command)
+  set_bisect_good(preparatory_command, test_command)
   system "git bisect run #{test_command}"
   system 'git bisect reset'
   system "git checkout #{starting_hash}"

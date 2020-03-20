@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # git-autobisect
 
-# 20200317
-# 0.3.0
+# 20200320
+# 0.3.1
 
 # Usage:
 # 1. As this assumes that the current hash is the git bisect bad point, first checkout that revision.
@@ -17,6 +17,8 @@
 
 # Changes since 0.2
 # 1. Previously if gems in the Gemfile change between commits, this could fail, so have introduced the idea of a preparatory command which could be as simple as `bundle install`.
+# 0/1
+# 2. The preparatory command should have been optional.
 
 require 'switches.rb'
 
@@ -34,12 +36,12 @@ def test_file(test_command)
   test_command.split.last.split(':').first
 end
 
-def most_recent_passing_test_file_hash(preparatory_command, test_command)
+def most_recent_passing_test_file_hash(test_command, preparatory_command = nil)
   reference_test_hashes = `git log --format=%H #{test_file(test_command)}`
   passing_test_file_hash = nil
   reference_test_hashes.split("\n").each do |reference_test_hash|
     system "git checkout #{reference_test_hash}"
-    system preparatory_command
+    system preparatory_command if preparatory_command
     system test_command
     if $?.success?
       passing_test_file_hash = reference_test_hash
@@ -53,8 +55,8 @@ def set_bisect_bad
   system "git bisect bad #{starting_hash}"
 end
 
-def set_bisect_good(preparatory_command, test_command)
-  hash = most_recent_passing_test_file_hash(preparatory_command, test_command)
+def set_bisect_good(test_command, preparatory_command = nil)
+  hash = most_recent_passing_test_file_hash(test_command, preparatory_command)
   raise "No version of #{test_file(test_command)} which passes was found, so I can't help you!" unless hash
   system "git bisect good #{hash}"
 end
@@ -65,7 +67,7 @@ def main
   system 'git bisect restart'
   system 'git bisect start'
   set_bisect_bad
-  set_bisect_good(preparatory_command, test_command)
+  set_bisect_good(test_command, preparatory_command)
   system "git bisect run #{test_command}"
   system 'git bisect reset'
   system "git checkout #{starting_hash}"

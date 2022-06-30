@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # git-autobisect
 
-# 20200320
-# 0.3.1
+# 20220617
+# 0.3.2
 
 # Usage:
 # 1. As this assumes that the current hash is the git bisect bad point, first checkout that revision.
@@ -15,10 +15,13 @@
 #   `git-autobisect bundle exec rspec spec/models/class.rb --preparatory_command 'bundle install'`.
 # 3. And that's it!
 
-# Changes since 0.2
+# Changes since 0.2:
 # 1. Previously if gems in the Gemfile change between commits, this could fail, so have introduced the idea of a preparatory command which could be as simple as `bundle install`.
 # 0/1
 # 2. The preparatory command should have been optional.
+# 3. ~ most_recent_passing_test_file_hash(), so that the preparatory command is issued only if not nil.
+# 1/2
+# 4. ~ main(), /restart/reset/ (Not sure if this was always wrong or has changed.)
 
 require 'switches.rb'
 
@@ -64,7 +67,7 @@ end
 def main
   preparatory_command = switches.preparatory_command # Need to process the switches first so as it clears out ARGV of any thing which is a switch prior to assigning the test_command.
   test_command = ARGV.join(' ')
-  system 'git bisect restart'
+  system 'git bisect reset'
   system 'git bisect start'
   set_bisect_bad
   set_bisect_good(test_command, preparatory_command)

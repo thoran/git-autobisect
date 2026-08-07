@@ -2,7 +2,7 @@
 # git-autobisect
 
 # 20260807
-# 0.3.3
+# 0.4.0
 
 # Usage:
 # 1. As this assumes that the current hash is the git bisect bad point, first checkout that revision.
@@ -14,16 +14,6 @@
 #    which is equivalent to:
 #   `git-autobisect bundle exec rspec spec/models/class.rb --preparatory_command 'bundle install'`.
 # 3. And that's it!
-
-# Changes since 0.2:
-# 1. Previously if gems in the Gemfile change between commits, this could fail, so have introduced the idea of a preparatory command which could be as simple as `bundle install`.
-# 0/1
-# 2. The preparatory command should have been optional.
-# 3. ~ most_recent_passing_test_file_hash(), so that the preparatory command is issued only if not nil.
-# 1/2
-# 4. ~ main(), /restart/reset/ (Not sure if this was always wrong or has changed.)
-# 2/3: Make the script executable.
-# 5. ~ bin/git-autobisect: mode 100644 --> 100755. A script carrying a shebang and not the bit to go with it cannot be run from a clone at all. Homebrew's bin.install had been setting the bit on the way past, so nothing showed until the formula moved to libexec.install, which keeps whatever mode the repository has.
 
 require 'switches.rb'
 

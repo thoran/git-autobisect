@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # git-autobisect
 
-# 20260807
-# 0.4.0
+# 20260820
+# 0.4.1
 
 # Usage:
 # 1. As this assumes that the current hash is the git bisect bad point, first checkout that revision.

@@ -1,19 +1,8 @@
 #!/usr/bin/env ruby
 # git-autobisect
 
-# 20260820
-# 0.4.1
-
-# Usage:
-# 1. As this assumes that the current hash is the git bisect bad point, first checkout that revision.
-# 2a. Issue a command like:
-#   `git-autobisect bundle exec rspec spec/models/class.rb`
-# OR
-# 2b. If it's necessary to run a command before each test run, then supply that like so:
-#   `git-autobisect bundle exec rspec spec/models/class.rb -p bundle`
-#    which is equivalent to:
-#   `git-autobisect bundle exec rspec spec/models/class.rb --preparatory_command 'bundle install'`.
-# 3. And that's it!
+# 20260821
+# 0.5.0
 
 require 'switches.rb'
 

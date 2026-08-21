@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 20260821
+
+0.5.0: + README.md, including what was in the Usage section.
+
+1. + README.md. Description, Installation, Dependencies, Usage, Notes and Contributing, following the shape of the READMEs the other programs in the tap carry.
+2. The Description sets out the four steps the script takes, the second of them being the point of the program: the good revision is found by walking the test file's own history until a revision of it passes.
+3. The Notes record what the reader would otherwise have to take from the source: the test file is the last word of the command with anything after a colon dropped, revisions are checked out in turn so the working tree must be clean, and a bisect already under way is reset first.
+4. - The Usage section from the script header. The README holds that record now, and keeping both invites them to disagree, which is how mercurial's Examples came to spend three versions describing behaviour it had stopped having.
+5. + A section setting out what is done to the repository, in order: bisect reset, bisect start, bisect bad, the walk for a good revision, bisect good, bisect run, then bisect reset and a checkout back to where you began. None of that was written down, and it is the thing worth knowing before handing a repository to something which checks out revisions in a loop.
+6. The preparatory command runs while the good revision is being looked for, and not during `git bisect run`, which is issued with the test command alone. Where that command is what makes the test runnable, the bisect proper can fail for the very reason the switch exists to prevent. The README records it; the code is left alone.
+7. Only revisions in which the test file itself changed are tried as candidates for the good point, `git log --format=%H` being asked for that file. Where the test has sat untouched across the breakage there is little to search, which the README now says.
+
+
 ## 20260820
 
 0.4.1: ~ .gitignore: + current default contents

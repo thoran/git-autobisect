@@ -2,7 +2,7 @@
 # git-autobisect
 
 # 20260821
-# 0.5.0
+# 0.5.1
 
 require 'switches.rb'
 

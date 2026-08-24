@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 # git-autobisect
 
-# 20260821
-# 0.5.1
+# 20260824
+# 0.5.2
+
+gem 'switches.rb'
 
 require 'switches.rb'
 

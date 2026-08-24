@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 20260824
+
+0.5.2: + gem 'switches.rb', without which the require names a file two gems provide.
+
+1. + gem 'switches.rb' to bin/git-autobisect. A require names a file rather than a gem, and switches.rb and Seamus Abshere's unrelated switches gem both ship lib/switches.rb, so with both installed `require "switches.rb"` loads whichever answers first rather than certainly thoran's. The gem line decides it; this had none.
+2. It bites only where the other gem is installed, which it is not here. The keg vendors what the formula names, so it is the gem home an invoking ruby brings that could carry it.
+3. ~ bin/git-autobisect: /0.5.1/0.5.2/, and the date.
+
+
 ## 20260821
 
 0.5.1: + LICENSE, and the README section naming it.
